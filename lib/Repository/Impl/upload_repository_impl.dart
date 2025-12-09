@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:file_transfer_module/Network/network_service.dart';
+import 'package:file_transfer_app/Network/network_service.dart';
 import '../Repo/upload_repository.dart';
 
 class UploadRepositoryImpl implements UploadRepository {
