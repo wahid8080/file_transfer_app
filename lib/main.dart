@@ -128,27 +128,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Upload Progress: $progress%',
-                  style: TextStyle(fontSize: 20),
-                ),
-                SizedBox(height: 20),
-                LinearProgressIndicator(
-                  value: progress / 100.0,
-                  minHeight: 8,
-                  backgroundColor: Colors.grey.shade300,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Colors.blue,
-                  ),
-                ),
-                SizedBox(height: 100),
-                ElevatedButton(
-                  onPressed: () {
-                    print("Current progress: ${snapshot.data?.progress}");
-                  },
-                  child: const Text('Get Data'),
-                ),
-                SizedBox(height: 100),
+
                 ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/upload'),
                   child: const Text('Upload File'),
