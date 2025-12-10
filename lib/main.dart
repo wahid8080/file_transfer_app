@@ -59,57 +59,60 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final receivePort = ReceivePort();
+  final uploadReceiver = ReceivePort();
+  final downloadReceiver = ReceivePort();
   OverlayEntry? _overlayEntry;
-  bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _setupIsolateListener();
-
-
+    setUploadStream();
+    setDownloadStream();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showGlobalOverlay();
+    });
   }
 
-  void _showGlobalOverlay() {
-    _overlayEntry = OverlayEntry(
-      builder: (context) => FloatingDownloadWidget(
-        isExpanded: _isExpanded,
-        onToggle: () {
-          setState(() {
-            _isExpanded = !_isExpanded;
-          });
-          _overlayEntry?.markNeedsBuild();
-        },
-      ),
-    );
-
-    navigatorKey.currentState?.overlay?.insert(_overlayEntry!);
-  }
-
-  void _setupIsolateListener() {
+  void setUploadStream() {
 
 
-    IsolateNameServer.registerPortWithName(receivePort.sendPort, 'upload_stream');
+    IsolateNameServer.registerPortWithName(uploadReceiver.sendPort, 'upload_stream');
 
-    receivePort.listen((message) {
+    uploadReceiver.listen((message) {
       if (message is Map) {
-        final progress = message["progress"] as int? ?? 0;
-        final status = message["status"] as bool? ?? false;
-        UploadProgressService.instance?.updateProgress(progress: progress);
-
-        if(progress>0){
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _showGlobalOverlay();
-          });
-        }
+        final progress = message["progress"];
+        final status = message["status"];
+        BroadcastProcessingService.instance?.updateProgress(progress: progress, streamStatus: 2);
+        _overlayEntry?.markNeedsBuild();
       }
     });
   }
 
+  void setDownloadStream() {
+
+
+    IsolateNameServer.registerPortWithName(downloadReceiver.sendPort, 'download_stream');
+
+    downloadReceiver.listen((message) {
+      if (message is Map) {
+        final progress = message["progress"];
+        final status = message["status"];
+        BroadcastProcessingService.instance?.updateProgress(progress: progress, streamStatus: 1);
+        _overlayEntry?.markNeedsBuild();
+      }
+    });
+  }
+
+  void _showGlobalOverlay() {
+    _overlayEntry = OverlayEntry(
+      builder: (context) => FloatingDownloadWidget(),
+    );
+    navigatorKey.currentState?.overlay?.insert(_overlayEntry!);
+  }
+
   @override
   void dispose() {
-    receivePort.close();
+    uploadReceiver.close();
     IsolateNameServer.removePortNameMapping('upload_stream');
     super.dispose();
   }
@@ -118,30 +121,21 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My App')),
-      body: StreamBuilder<UploadProgressModel>(
-        stream: UploadProgressService.instance?.progressStream,
-        initialData: UploadProgressService.instance?.currentProgress,
-        builder: (context, snapshot) {
-          final progress = snapshot.data?.progress ?? 0;
-
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/upload'),
-                  child: const Text('Upload File'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/download'),
-                  child: const Text('Download File'),
-                ),
-              ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/upload'),
+              child: const Text('Upload File'),
             ),
-          );
-        },
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/download'),
+              child: const Text('Download File'),
+            ),
+          ],
+        ),
       ),
     );
   }
