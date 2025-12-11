@@ -41,8 +41,8 @@ class _FloatingDownloadWidgetState extends State<FloatingDownloadWidget> {
       right: 20,
       left: 20,
       child: StreamBuilder<UploadProgressModel>(
-        stream: BroadcastProcessingService.instance?.progressStream,
-        initialData: BroadcastProcessingService.instance?.currentProgress,
+        stream: BroadcastProcessingService.instance?.getUploadStream(),
+        initialData: BroadcastProcessingService.instance?.getInitialProgressModel(),
         builder: (context, snapshot) {
           final progress = snapshot.data?.progress ?? 0;
 
