@@ -11,8 +11,8 @@ class NetworkService {
   String? _authToken;
 
   static const String _baseUrl = 'http://54.241.200.172:8800/setup-ws/api/v1/';
-  static const String _uploadEndpoint = 'app/update-app/2'; // Change this
-  static const String _downloadEndpoint = 'app/get-permitted-apps?companyId=2'; // Change this
+  static const String _uploadEndpoint = 'app/update-app/2';
+  static const String _downloadEndpoint = 'app/get-permitted-apps?companyId=2';
 
   NetworkService._internal() {
     _dio = Dio(
